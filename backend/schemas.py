@@ -93,3 +93,4 @@ class DashboardStats(BaseModel):
     evaluated: int
     pending: int
     avg_score: Optional[float]
+    total_coaches: int

@@ -14,6 +14,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface Coach {
+  id: string;
+  name: string;
+}
+
+interface Client {
+  id: string;
+  name: string;
+}
+
+interface Program {
+  id: string;
+  name: string;
+}
+
 interface Call {
   id: string;
   coach_id: string;
@@ -23,11 +38,15 @@ interface Call {
   title: string;
   scheduled_at: string;
   status: string;
+  coach?: Coach;
+  client?: Client;
+  program?: Program;
 }
 
 export function CallList() {
   const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
@@ -37,16 +56,18 @@ export function CallList() {
 
   const fetchCalls = async () => {
     setLoading(true);
+    setError(null);
     try {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
       if (typeFilter !== "all") params.append("type", typeFilter);
 
       const res = await fetch(`/api/calls?${params}`);
+      if (!res.ok) throw new Error(`Failed to load calls (${res.status})`);
       const data = await res.json();
       setCalls(data);
-    } catch (error) {
-      console.error("Failed to fetch calls:", error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load calls");
     } finally {
       setLoading(false);
     }
@@ -114,10 +135,15 @@ export function CallList() {
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {error ? (
+            <div className="py-8 text-center">
+              <p className="text-sm text-destructive mb-2">{error}</p>
+              <Button variant="outline" size="sm" onClick={fetchCalls}>Retry</Button>
+            </div>
+          ) : loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 w-full" />
+                <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
           ) : calls.length === 0 ? (
@@ -138,6 +164,11 @@ export function CallList() {
                       <Badge className={getTypeColor(call.type)}>
                         {call.type.replace("_", " ")}
                       </Badge>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <span>Coach: {call.coach?.name || "—"}</span>
+                      <span>Client: {call.client?.name || "—"}</span>
+                      <span>Program: {call.program?.name || "—"}</span>
                     </div>
                     <span className="text-sm text-muted-foreground">
                       {new Date(call.scheduled_at).toLocaleDateString()}

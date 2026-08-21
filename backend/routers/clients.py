@@ -1,10 +1,14 @@
-from ..database import get_db
-from ..models import Client
-from ..schemas import Client as ClientSchema
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from typing import Optional, List
+from database import get_db
+from sql_models import Client
+from schemas import Client as ClientSchema
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
-@router.get("", response_model=ClientSchema)
+@router.get("", response_model=List[ClientSchema])
 def list_clients(search: Optional[str] = Query(None), db: Session = Depends(get_db)):
     stmt = select(Client)
     if search:

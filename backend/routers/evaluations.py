@@ -1,16 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from typing import List, Optional
 from datetime import datetime
-from ..database import get_db
-from ..models import Call, CallStatus, Evaluation, DimensionScore
-from ..schemas import Evaluation as EvaluationSchema
+from database import get_db
+from sql_models import Call, CallStatus, Evaluation, DimensionScore
+from schemas import Evaluation as EvaluationSchema
 from services.ai_evaluator import run_evaluation
 
 router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 
+@router.get("", response_model=List[EvaluationSchema])
+def list_evaluations(call_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
+    stmt = select(Evaluation)
+    if call_id:
+        stmt = stmt.where(Evaluation.call_id == call_id)
+    return db.execute(stmt).scalars().all()
+
 @router.post("", response_model=EvaluationSchema)
-def create_evaluation(call_id: str, db: Session = Depends(get_db)):
+def create_evaluation(call_id: str = Query(...), db: Session = Depends(get_db)):
     call = db.get(Call, call_id)
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")

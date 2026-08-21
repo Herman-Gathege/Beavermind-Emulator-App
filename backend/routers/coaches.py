@@ -1,10 +1,14 @@
-from ..database import get_db
-from ..models import Coach
-from ..schemas import Coach as CoachSchema
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from typing import Optional, List
+from database import get_db
+from sql_models import Coach
+from schemas import Coach as CoachSchema
 
 router = APIRouter(prefix="/coaches", tags=["coaches"])
 
-@router.get("", response_model=CoachSchema)
+@router.get("", response_model=List[CoachSchema])
 def list_coaches(search: Optional[str] = Query(None), db: Session = Depends(get_db)):
     stmt = select(Coach)
     if search:

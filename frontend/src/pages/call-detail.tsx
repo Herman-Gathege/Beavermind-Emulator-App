@@ -1,12 +1,31 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Play, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Play, Loader2, CheckCircle2, User, Building2, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+
+interface Coach {
+  id: string;
+  name: string;
+  specialty: string;
+}
+
+interface Client {
+  id: string;
+  name: string;
+  organization: string;
+}
+
+interface Program {
+  id: string;
+  name: string;
+  coach: Coach;
+  client: Client;
+}
 
 interface Call {
   id: string;
@@ -18,6 +37,9 @@ interface Call {
   scheduled_at: string;
   transcript: string;
   status: string;
+  coach?: Coach;
+  client?: Client;
+  program?: Program;
 }
 
 interface DimensionScore {
@@ -38,6 +60,7 @@ export function CallDetail() {
   const { id } = useParams<{ id: string }>();
   const [call, setCall] = useState<Call | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
 
@@ -48,10 +71,18 @@ export function CallDetail() {
   const fetchCall = async () => {
     try {
       const res = await fetch(`/api/calls/${id}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          setError("Call not found");
+        } else {
+          setError(`Failed to load call (${res.status})`);
+        }
+        return;
+      }
       const data = await res.json();
       setCall(data);
-    } catch (error) {
-      console.error("Failed to fetch call:", error);
+    } catch (err) {
+      setError("Unable to connect to the server");
     } finally {
       setLoading(false);
     }
@@ -63,10 +94,11 @@ export function CallDetail() {
       const res = await fetch(`/api/evaluations?call_id=${id}`, {
         method: "POST",
       });
+      if (!res.ok) throw new Error(`Evaluation failed: ${res.status}`);
       const data = await res.json();
       setEvaluation(data);
-    } catch (error) {
-      console.error("Failed to run evaluation:", error);
+    } catch (err) {
+      console.error("Failed to run evaluation:", err);
     } finally {
       setEvaluating(false);
     }
@@ -81,8 +113,15 @@ export function CallDetail() {
     );
   }
 
-  if (!call) {
-    return <div>Call not found</div>;
+  if (error || !call) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-lg font-medium text-destructive">{error || "Call not found"}</p>
+        <Button variant="outline" className="mt-4" asChild>
+          <Link to="/calls">Back to Calls</Link>
+        </Button>
+      </div>
+    );
   }
 
   return (
@@ -117,6 +156,44 @@ export function CallDetail() {
             {evaluating ? "Evaluating..." : "Run Evaluation"}
           </Button>
         )}
+      </div>
+
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <User className="h-4 w-4" />
+              Coach
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="font-medium text-sm">{call.coach?.name || "—"}</p>
+            <p className="text-xs text-muted-foreground">{call.coach?.specialty || ""}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Building2 className="h-4 w-4" />
+              Client
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="font-medium text-sm">{call.client?.name || "—"}</p>
+            <p className="text-xs text-muted-foreground">{call.client?.organization || ""}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <Briefcase className="h-4 w-4" />
+              Program
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="font-medium text-sm">{call.program?.name || "—"}</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
