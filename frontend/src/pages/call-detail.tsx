@@ -53,6 +53,9 @@ interface Evaluation {
   id: string;
   overall_score: number;
   summary: string;
+  strengths: string[];
+  improvement_areas: string[];
+  recommendations: string[];
   dimension_scores: DimensionScore[];
 }
 
@@ -63,6 +66,7 @@ export function CallDetail() {
   const [error, setError] = useState<string | null>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
+  const [evalError, setEvalError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCall();
@@ -90,15 +94,20 @@ export function CallDetail() {
 
   const runEvaluation = async () => {
     setEvaluating(true);
+    setEvalError(null);
     try {
       const res = await fetch(`/api/evaluations?call_id=${id}`, {
         method: "POST",
       });
-      if (!res.ok) throw new Error(`Evaluation failed: ${res.status}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Evaluation failed: ${res.status}`);
+      }
       const data = await res.json();
       setEvaluation(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to run evaluation:", err);
+      setEvalError(err.message || "We couldn't evaluate this call right now. Please try again.");
     } finally {
       setEvaluating(false);
     }
@@ -240,6 +249,33 @@ export function CallDetail() {
                   </p>
                 </div>
 
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                  <div className="rounded-lg border p-3">
+                    <h4 className="mb-2 font-semibold text-sm text-green-600">Strengths</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {(evaluation.strengths || []).map((item, idx) => (
+                        <li key={idx} className="text-xs text-muted-foreground">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <h4 className="mb-2 font-semibold text-sm text-amber-600">Improvement Areas</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {(evaluation.improvement_areas || []).map((item, idx) => (
+                        <li key={idx} className="text-xs text-muted-foreground">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <h4 className="mb-2 font-semibold text-sm text-blue-600">Recommendations</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {(evaluation.recommendations || []).map((item, idx) => (
+                        <li key={idx} className="text-xs text-muted-foreground">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
                 <div>
                   <h4 className="mb-3 font-semibold text-sm">Dimension Scores</h4>
                   <div className="space-y-3">
@@ -273,7 +309,12 @@ export function CallDetail() {
               <CardHeader>
                 <CardTitle>Evaluation</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {evalError && (
+                  <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+                    <p className="text-sm text-destructive">{evalError}</p>
+                  </div>
+                )}
                 <p className="text-sm text-muted-foreground">
                   Click &ldquo;Run Evaluation&rdquo; to analyze this call against the 12-dimension rubric.
                 </p>

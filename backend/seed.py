@@ -6,6 +6,7 @@ from database import Base, engine
 from datetime import datetime, timedelta
 import uuid
 import random
+import json
 
 def seed_data(db: Session):
     Base.metadata.create_all(bind=engine)
@@ -89,6 +90,9 @@ def seed_data(db: Session):
             call_id=call.id,
             overall_score=overall,
             summary=f"Historical evaluation for call {i+1}. Strong performance across most dimensions with room for improvement in time management and obstacle navigation.",
+            strengths=json.dumps(["Demonstrated strong rapport building.", "Maintained clear session structure."]),
+            improvement_areas=json.dumps(["Could deepen diagnostic questioning.", "Time management could be tighter."]),
+            recommendations=json.dumps(["Introduce a mid-session check-in.", "Pre-send a brief agenda template."]),
             raw_response=""
         )
         db.add(evaluation)
