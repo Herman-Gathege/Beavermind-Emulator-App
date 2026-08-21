@@ -44,18 +44,30 @@ A time-boxed MVP emulator of a coaching-call evaluation workflow for the Beaverm
 │   ├── package.json
 │   ├── vite.config.ts
 │   ├── tsconfig.json
-│   ├── tailwind.config.ts
-│   ├── postcss.config.ts
+│   ├── postcss.config.js
 │   ├── index.html
 │   ├── .env.example
 │   └── src/
 │       ├── main.tsx
 │       ├── App.tsx
 │       ├── index.css
-│       └── lib/utils.ts
+│       ├── App.css
+│       ├── components/
+│       │   ├── ui/           # shadcn/ui components
+│       │   ├── app-sidebar.tsx
+│       │   ├── dashboard.tsx
+│       │   └── site-header.tsx
+│       ├── pages/
+│       │   ├── calls.tsx
+│       │   ├── call-detail.tsx
+│       │   ├── analytics.tsx
+│       │   └── settings.tsx
+│       └── lib/
+│           └── utils.ts
 │
 ├── docs/
-│   └── 01-project-discovery.md
+│   ├── 01-project-discovery.md
+│   └── 02-ux-ui-responsive-polish.md
 │
 └── docker-compose.yml       # Local Supabase
 ```
@@ -128,6 +140,27 @@ The app will be available at `http://localhost:5173`.
 |----------|-------------|---------|
 | `VITE_API_BASE_URL` | Backend API base URL | `http://localhost:8000/api` |
 
+## Development Commands
+
+### Frontend
+
+```bash
+cd frontend
+
+npm run dev        # Start dev server (Vite)
+npm run build      # TypeScript check + production build
+npm run lint       # Run Oxlint
+npm run preview    # Preview production build locally
+```
+
+### Backend
+
+```bash
+cd backend
+
+uvicorn main:app --reload --port 8000  # Start dev server
+```
+
 ## API Endpoints
 
 | Method | Path | Description |
@@ -182,8 +215,14 @@ The app will be available at `http://localhost:5173`.
 
 ## Milestones
 
-- **Milestone 1 (Current)**: Discovery & Foundation Planning — repository scaffold, architecture, data model, API design, sprint backlog.
-- **Milestone 2**: Vertical Slice Implementation — end-to-end call search → evaluation → results flow.
+- **Sprint 1 (Current)**: Foundation & UX/UI Polish — repository scaffold, architecture, data model, API design, responsive dashboard, purple/black/white theme, mobile/tablet/desktop validation.
+- **Sprint 2**: Vertical Slice Implementation — end-to-end call search → evaluation → results flow, real charts, settings page, backend integration.
+
+## Sprint 1 Status
+
+Sprint 1 is **complete with known minor issues**. The dashboard is responsive and follows a consistent purple/black/white design system. All major viewports have been verified through code review. Pre-existing React hook lint warnings in `calls.tsx` and `call-detail.tsx` are non-blocking.
+
+See `docs/02-ux-ui-responsive-polish.md` for full Sprint 1 documentation.
 
 ## License
 

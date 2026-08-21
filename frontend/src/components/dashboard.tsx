@@ -21,56 +21,64 @@ interface DashboardProps {
 
 export function Dashboard({ stats, recentEvaluations }: DashboardProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
+        <p className="text-muted-foreground mt-1">
           Overview of coaching call evaluations
         </p>
       </div>
 
       <SectionCards stats={stats} />
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-1 md:col-span-4">
           <CardHeader>
-            <CardTitle>Evaluation Trends</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-primary" />
+              Evaluation Trends
+            </CardTitle>
           </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Chart placeholder — connect to analytics endpoint
+          <CardContent>
+            <div className="h-[250px] md:h-[300px] flex flex-col items-center justify-center text-muted-foreground gap-3 rounded-lg border border-dashed">
+              <BarChart3 className="h-8 w-8 text-primary/60" />
+              <p className="text-sm">Chart placeholder — connect to analytics endpoint</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="col-span-3">
+        <Card className="col-span-1 md:col-span-3">
           <CardHeader>
-            <CardTitle>Recent Evaluations</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              Recent Evaluations
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentEvaluations.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No evaluations yet.</p>
-              ) : (
-                recentEvaluations.map((eval_) => (
+            {recentEvaluations.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No evaluations yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {recentEvaluations.map((eval_) => (
                   <div
                     key={eval_.id}
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-accent"
                   >
-                    <div>
-                      <p className="text-sm font-medium">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">
                         Call {eval_.call_id}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Score: {eval_.overall_score?.toFixed(1)}
                       </p>
                     </div>
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 ml-3" />
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -107,7 +115,7 @@ function SectionCards({ stats }: { stats: DashboardStats }) {
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => (
         <Card key={card.title}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -118,7 +126,7 @@ function SectionCards({ stats }: { stats: DashboardStats }) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{card.value}</div>
-            <p className="text-xs text-muted-foreground">{card.change}</p>
+            <p className="text-xs text-muted-foreground mt-1">{card.change}</p>
           </CardContent>
         </Card>
       ))}

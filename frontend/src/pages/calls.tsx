@@ -70,14 +70,14 @@ export function CallList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Calls</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Calls</h2>
+          <p className="text-muted-foreground mt-1">
             Find and review coaching calls
           </p>
         </div>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
           New Call
         </Button>
@@ -87,18 +87,18 @@ export function CallList() {
         <CardHeader>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <CardTitle>All Calls</CardTitle>
-            <div className="flex flex-col gap-2 md:flex-row">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search calls..."
-                  className="pl-8 md:w-64"
+                  className="pl-8 w-full sm:w-64"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-full md:w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
@@ -117,7 +117,7 @@ export function CallList() {
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+                <Skeleton key={i} className="h-14 w-full" />
               ))}
             </div>
           ) : calls.length === 0 ? (
@@ -130,11 +130,11 @@ export function CallList() {
                 <Link
                   key={call.id}
                   to={`/calls/${call.id}`}
-                  className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-accent"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border p-4 transition-colors hover:bg-accent"
                 >
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{call.title}</span>
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium truncate">{call.title}</span>
                       <Badge className={getTypeColor(call.type)}>
                         {call.type.replace("_", " ")}
                       </Badge>
@@ -143,7 +143,7 @@ export function CallList() {
                       {new Date(call.scheduled_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <Badge className={getStatusColor(call.status)}>
+                  <Badge className={`${getStatusColor(call.status)} w-full sm:w-auto text-center justify-center`}>
                     {call.status}
                   </Badge>
                 </Link>

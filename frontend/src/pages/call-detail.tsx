@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SiteHeader } from "@/components/site-header";
 
 interface Call {
   id: string;
@@ -88,27 +87,28 @@ export function CallDetail() {
 
   return (
     <div className="space-y-6">
-      <SiteHeader title={call.title} />
-      <div className="flex items-center gap-4">
-        <Link to="/calls">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{call.title}</h1>
-            <Badge>{call.type.replace("_", " ")}</Badge>
-            <Badge variant={call.status === "evaluated" ? "default" : "secondary"}>
-              {call.status}
-            </Badge>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <Link to="/calls">
+            <Button variant="ghost" size="icon" aria-label="Back to calls">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl md:text-2xl font-bold truncate">{call.title}</h1>
+              <Badge variant="secondary">{call.type.replace("_", " ")}</Badge>
+              <Badge variant={call.status === "evaluated" ? "default" : "secondary"}>
+                {call.status}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {new Date(call.scheduled_at).toLocaleString()}
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            {new Date(call.scheduled_at).toLocaleString()}
-          </p>
         </div>
         {!evaluation && (
-          <Button onClick={runEvaluation} disabled={evaluating}>
+          <Button onClick={runEvaluation} disabled={evaluating} className="w-full md:w-auto">
             {evaluating ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -119,7 +119,7 @@ export function CallDetail() {
         )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Transcript</CardTitle>
@@ -128,7 +128,7 @@ export function CallDetail() {
             <Textarea
               readOnly
               value={call.transcript || "No transcript available."}
-              className="min-h-[400px] font-mono text-sm"
+              className="min-h-[300px] md:min-h-[400px] font-mono text-sm"
             />
           </CardContent>
         </Card>
@@ -157,14 +157,14 @@ export function CallDetail() {
                 </div>
 
                 <div>
-                  <h4 className="mb-2 font-semibold">Summary</h4>
+                  <h4 className="mb-2 font-semibold text-sm">Summary</h4>
                   <p className="text-sm text-muted-foreground">
                     {evaluation.summary}
                   </p>
                 </div>
 
                 <div>
-                  <h4 className="mb-3 font-semibold">Dimension Scores</h4>
+                  <h4 className="mb-3 font-semibold text-sm">Dimension Scores</h4>
                   <div className="space-y-3">
                     {evaluation.dimension_scores.map((dim, idx) => (
                       <div
@@ -172,7 +172,7 @@ export function CallDetail() {
                         className="rounded-lg border p-3"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-medium">{dim.dimension}</span>
+                          <span className="font-medium text-sm">{dim.dimension}</span>
                           <span className="text-sm font-bold">
                             {dim.score.toFixed(1)}
                           </span>
@@ -182,7 +182,7 @@ export function CallDetail() {
                         </p>
                         {dim.evidence && (
                           <p className="mt-1 text-xs italic text-muted-foreground">
-                            "{dim.evidence}"
+                            &ldquo;{dim.evidence}&rdquo;
                           </p>
                         )}
                       </div>
@@ -198,7 +198,7 @@ export function CallDetail() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Click "Run Evaluation" to analyze this call against the 12-dimension rubric.
+                  Click &ldquo;Run Evaluation&rdquo; to analyze this call against the 12-dimension rubric.
                 </p>
               </CardContent>
             </Card>

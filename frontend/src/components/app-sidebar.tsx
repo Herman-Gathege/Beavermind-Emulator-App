@@ -17,59 +17,93 @@ const navigation = [
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
   return (
-    <div
-      className={`flex flex-col border-r bg-card transition-all duration-300 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
-    >
-      <div className="flex h-14 items-center justify-between border-b px-4">
-        {!collapsed && (
-          <Link to="/" className="flex items-center gap-2 font-bold">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+    <>
+      <div
+        className={`
+          fixed inset-y-0 left-0 z-50 bg-card border-r
+          transform transition-transform duration-300 ease-in-out
+          md:relative md:translate-x-0
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          ${collapsed ? "w-16" : "w-64"}
+        `}
+      >
+        <div className="flex h-14 items-center justify-between border-b px-4">
+          {!collapsed && (
+            <Link to="/" className="flex items-center gap-2 font-bold">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <LayoutDashboard className="h-4 w-4" />
+              </div>
+              <span className="text-lg">Beavermind</span>
+            </Link>
+          )}
+          {collapsed && (
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground mx-auto">
               <LayoutDashboard className="h-4 w-4" />
             </div>
-            <span className="text-lg">Beavermind</span>
-          </Link>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="rounded-md p-1.5 hover:bg-accent"
-        >
-          {collapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
-        </button>
-      </div>
-
-      <nav className="flex-1 space-y-1 p-2">
-        {navigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
+          )}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="rounded-md p-1.5 hover:bg-accent hidden md:flex"
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              <item.icon className="h-4 w-4" />
-              {!collapsed && <span>{item.name}</span>}
-            </Link>
-          );
-        })}
-      </nav>
+              {collapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-accent md:hidden"
+              aria-label="Close navigation"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
 
-      <div className="border-t p-2">
-        <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">
-          <LogOut className="h-4 w-4" />
-          {!collapsed && <span>Log out</span>}
-        </button>
+        <nav className="flex-1 space-y-1 p-2">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={onClose}
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                }`}
+              >
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                {!collapsed && <span>{item.name}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="border-t p-2">
+          <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">
+            <LogOut className="h-4 w-4 flex-shrink-0" />
+            {!collapsed && <span>Log out</span>}
+          </button>
+        </div>
       </div>
-    </div>
+
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={onClose}
+        />
+      )}
+    </>
   );
 }
