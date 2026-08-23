@@ -10,9 +10,11 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Beavermind Emulator API", version="1.0.0")
 
+allow_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

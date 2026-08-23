@@ -1,15 +1,20 @@
-from ..database import get_db
-from ..models import Call, CallType, CallStatus, Coach, Client, Program
-from ..schemas import Call as CallSchema
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from typing import Optional, List
+from database import get_db
+from sql_models import Call, CallType, CallStatus, Coach, Client, Program
+from schemas import Call as CallSchema
 
 router = APIRouter(prefix="/calls", tags=["calls"])
 
-@router.get("", response_model=CallSchema)
+@router.get("", response_model=List[CallSchema])
 def list_calls(
     coach_id: Optional[str] = Query(None),
     client_id: Optional[str] = Query(None),
     program_id: Optional[str] = Query(None),
     type: Optional[CallType] = Query(None),
+    search: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
     stmt = select(Call)
@@ -21,6 +26,8 @@ def list_calls(
         stmt = stmt.where(Call.program_id == program_id)
     if type:
         stmt = stmt.where(Call.type == type)
+    if search:
+        stmt = stmt.where(Call.title.ilike(f"%{search}%"))
     return db.execute(stmt).scalars().all()
 
 @router.get("/{call_id}", response_model=CallSchema)

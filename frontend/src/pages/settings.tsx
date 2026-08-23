@@ -7,7 +7,7 @@ export function SettingsPage() {
       <div>
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Settings</h2>
         <p className="text-muted-foreground mt-1">
-          Manage application settings
+          Application configuration
         </p>
       </div>
       <Card>
@@ -19,7 +19,7 @@ export function SettingsPage() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Settings page will be implemented in the next milestone.
+            Settings and user preferences are outside the scope of this MVP.
           </p>
         </CardContent>
       </Card>

@@ -1,10 +1,14 @@
-from ..database import get_db
-from ..models import Program, Coach, Client
-from ..schemas import Program as ProgramSchema
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from sqlalchemy import select
+from typing import Optional, List
+from database import get_db
+from sql_models import Program, Coach, Client
+from schemas import Program as ProgramSchema
 
 router = APIRouter(prefix="/programs", tags=["programs"])
 
-@router.get("", response_model=ProgramSchema)
+@router.get("", response_model=List[ProgramSchema])
 def list_programs(coach_id: Optional[str] = Query(None), client_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     stmt = select(Program)
     if coach_id:

@@ -1,8 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 from uuid import UUID
 from models import CallType, CallStatus
+import json
 
 class CoachBase(BaseModel):
     name: str
@@ -82,8 +83,30 @@ class Evaluation(EvaluationBase):
     id: UUID
     overall_score: Optional[float]
     summary: Optional[str]
+    strengths: Optional[List[str]] = []
+    improvement_areas: Optional[List[str]] = []
+    recommendations: Optional[List[str]] = []
     created_at: datetime
     dimension_scores: List[DimensionScore] = []
+
+    @field_validator("strengths", "improvement_areas", "recommendations", mode="before")
+    @classmethod
+    def parse_json_list(cls, v: Any) -> List[str]:
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(item) for item in v]
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return [str(item) for item in parsed]
+            except json.JSONDecodeError:
+                return [v]
+        return []
 
     class Config:
         from_attributes = True
@@ -93,3 +116,4 @@ class DashboardStats(BaseModel):
     evaluated: int
     pending: int
     avg_score: Optional[float]
+    total_coaches: int

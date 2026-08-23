@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Text, Numeric, ForeignKey, UUID
+from sqlalchemy import Column, String, DateTime, Text, Numeric, ForeignKey, UUID, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
@@ -62,6 +62,9 @@ class Evaluation(Base):
     call_id = Column(UUID(as_uuid=True), ForeignKey("calls.id"), nullable=False)
     overall_score = Column(Numeric(3, 2))
     summary = Column(Text)
+    strengths = Column(Text)
+    improvement_areas = Column(Text)
+    recommendations = Column(Text)
     raw_response = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
