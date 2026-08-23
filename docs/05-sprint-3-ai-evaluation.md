@@ -1,10 +1,10 @@
 # Sprint 3 — AI Evaluation
 
-## 1. Sprint Objective
+## Sprint Objective
 
-Turn the existing Sprint 2 evaluation mechanism into a genuine AI-assisted coaching-call evaluation workflow. The reviewer must be able to complete: SELECT CALL → RUN EVALUATION → RECEIVE STRUCTURED EVALUATION → REVIEW RESULTS. This is the most important vertical slice of the MVP.
+I turned the existing Sprint 2 evaluation mechanism into a genuine AI-assisted coaching-call evaluation workflow. The reviewer must be able to complete: SELECT CALL → RUN EVALUATION → RECEIVE STRUCTURED EVALUATION → REVIEW RESULTS. This is the most important vertical slice of the MVP.
 
-## 2. Existing Evaluation Implementation
+## What Existed Before
 
 Before Sprint 3, the backend already had:
 
@@ -16,53 +16,59 @@ Before Sprint 3, the backend already had:
 
 The existing dimensions were: Active Listening, Goal Alignment, Question Quality, Empathy & Rapport, Solution Framing, Accountability Setup, Progress Tracking, Obstacle Navigation, Client Autonomy, Feedback Delivery, Next Steps Clarity, Time Management.
 
-## 3. Changes Implemented
+## What I Changed
 
 ### Backend
 
-- **`backend/services/ai_evaluator.py`**:
-  - Replaced dimension list with 12 coaching-specific dimensions: Check-in & Connection, Agenda & Alignment, Active Listening, Question Quality, Diagnostics / Discovery, Goal Clarity, Coaching & Guidance, Insight Generation, Action Planning, Accountability, Communication Quality, Close & Next Steps.
-  - Added call type context (`call_type` parameter) with guidance strings for sales, kickoff, coaching, and strategic_review calls.
-  - Added Pydantic validation models (`DimensionSchema`, `EvaluationSchema`) with `_validate_and_normalize()` that enforces:
-    - Exactly 12 dimensions
-    - Valid dimension names from the fixed list
-    - No duplicate dimensions
-    - Scores between 1 and 5
-    - `overall_score` must equal the arithmetic mean of the 12 dimension scores (rounded to 2 decimals)
-    - Required fields present
-  - Improved prompt with explicit evidence requirements, scoring scale definitions, call type guidance, and instructions to state "Insufficient evidence in transcript." when evidence is lacking.
-  - Added `strengths`, `improvement_areas`, and `recommendations` to the AI output structure.
-  - Better error handling: AI failures raise `RuntimeError` instead of silently returning mock data. Mock data is only returned when `OPENAI_API_KEY` is not configured.
-  - Logging added for failures.
+**`backend/services/ai_evaluator.py`**:
 
-- **`backend/sql_models.py`**:
-  - Added nullable `Text` columns to `Evaluation`: `strengths`, `improvement_areas`, `recommendations`.
+- Replaced the dimension list with 12 coaching-specific dimensions: Check-in & Connection, Agenda & Alignment, Active Listening, Question Quality, Diagnostics / Discovery, Goal Clarity, Coaching & Guidance, Insight Generation, Action Planning, Accountability, Communication Quality, Close & Next Steps.
+- Added call type context (`call_type` parameter) with guidance strings for sales, kickoff, coaching, and strategic_review calls.
+- Added Pydantic validation models (`DimensionSchema`, `EvaluationSchema`) with `_validate_and_normalize()` that enforces:
+  - Exactly 12 dimensions
+  - Valid dimension names from the fixed list
+  - No duplicate dimensions
+  - Scores between 1 and 5
+  - `overall_score` must equal the arithmetic mean of the 12 dimension scores (rounded to 2 decimals)
+  - Required fields present
+- Improved the prompt with explicit evidence requirements, scoring scale definitions, call type guidance, and instructions to state "Insufficient evidence in transcript." when evidence is lacking.
+- Added `strengths`, `improvement_areas`, and `recommendations` to the AI output structure.
+- Better error handling: AI failures raise `RuntimeError` instead of silently returning mock data. Mock data is only returned when `OPENAI_API_KEY` is not configured.
+- Logging added for failures.
 
-- **`backend/schemas.py`**:
-  - Added `strengths`, `improvement_areas`, `recommendations` (optional `List[str]`) to `Evaluation` schema.
-  - Added `field_validator` to parse JSON strings from the database into Python lists.
-  - Added `json` import and `field_validator` import.
+**`backend/sql_models.py`**:
 
-- **`backend/routers/evaluations.py`**:
-  - `POST /api/evaluations` now passes `call_type=call.type.value` to `run_evaluation()`.
-  - Added UUID validation for `call_id` query parameter — invalid UUIDs return 404 instead of 500.
-  - Controlled error responses: AI/provider failures return HTTP 502 with a friendly message; unexpected errors return HTTP 500 with a friendly message. Raw provider errors are not exposed.
-  - Saves `strengths`, `improvement_areas`, `recommendations` as JSON strings.
+- Added nullable `Text` columns to `Evaluation`: `strengths`, `improvement_areas`, `recommendations`.
 
-- **`backend/seed.py`**:
-  - Updated seeded evaluations to include `strengths`, `improvement_areas`, `recommendations` as JSON strings.
-  - Added `json` import.
+**`backend/schemas.py`**:
+
+- Added `strengths`, `improvement_areas`, `recommendations` (optional `List[str]`) to `Evaluation` schema.
+- Added `field_validator` to parse JSON strings from the database into Python lists.
+- Added `json` import and `field_validator` import.
+
+**`backend/routers/evaluations.py`**:
+
+- `POST /api/evaluations` now passes `call_type=call.type.value` to `run_evaluation()`.
+- Added UUID validation for `call_id` query parameter — invalid UUIDs return 404 instead of 500.
+- Controlled error responses: AI/provider failures return HTTP 502 with a friendly message; unexpected errors return HTTP 500 with a friendly message. Raw provider errors are not exposed.
+- Saves `strengths`, `improvement_areas`, `recommendations` as JSON strings.
+
+**`backend/seed.py`**:
+
+- Updated seeded evaluations to include `strengths`, `improvement_areas`, `recommendations` as JSON strings.
+- Added `json` import.
 
 ### Frontend
 
-- **`frontend/src/pages/call-detail.tsx`**:
-  - Updated `Evaluation` interface to include `strengths`, `improvement_areas`, `recommendations`.
-  - Added `evalError` state to capture and display backend error messages.
-  - Enhanced evaluation result UI with three-column grid showing Strengths (green), Improvement Areas (amber), and Recommendations (blue).
-  - Error state shows a friendly destructive-styled alert instead of silently failing.
-  - `runEvaluation` now surfaces `err.message` from the backend response.
+**`frontend/src/pages/call-detail.tsx`**:
 
-## 4. AI Architecture
+- Updated `Evaluation` interface to include `strengths`, `improvement_areas`, `recommendations`.
+- Added `evalError` state to capture and display backend error messages.
+- Enhanced evaluation result UI with three-column grid showing Strengths (green), Improvement Areas (amber), and Recommendations (blue).
+- Error state shows a friendly destructive-styled alert instead of silently failing.
+- `runEvaluation` now surfaces `err.message` from the backend response.
+
+## AI Architecture
 
 ```
 User clicks "Run Evaluation"
@@ -89,7 +95,7 @@ Pydantic Validation (_validate_and_normalize)
 Database (Evaluation + DimensionScore)
 ```
 
-## 5. MVP Evaluation Rubric
+## MVP Evaluation Rubric
 
 This rubric is an MVP interpretation based on the assessment requirements and is not presented as Beavermind's proprietary internal rubric.
 
@@ -108,7 +114,7 @@ The 12 evaluation dimensions are:
 11. **Communication Quality** — Clarity, tone, pacing, and adaptability of the coach's communication.
 12. **Close & Next Steps** — Effective session close, recap, and alignment on what happens next.
 
-## 6. Scoring Model
+## Scoring Model
 
 - Each dimension is scored on a **1–5 scale**:
   - 1 = Poor
@@ -119,7 +125,7 @@ The 12 evaluation dimensions are:
 - **Overall score** = arithmetic mean of the 12 dimension scores, rounded to 2 decimal places.
 - No weighting is applied in the MVP. The AI is instructed to calculate the mean explicitly.
 
-## 7. AI Prompt Strategy
+## AI Prompt Strategy
 
 The evaluation prompt is sent as a single user message with a system instruction to return ONLY valid JSON. The prompt includes:
 
@@ -136,7 +142,7 @@ The evaluation prompt is sent as a single user message with a system instruction
 
 Temperature is set to 0.2 for deterministic, consistent output. `response_format: {"type": "json_object"}` is used to enforce structured JSON from the model.
 
-## 8. Structured Output
+## Structured Output
 
 The AI is required to return:
 
@@ -163,7 +169,7 @@ The AI is required to return:
 - Scores must be numbers between 1 and 5.
 - `overall_score` is validated to equal the mean of the dimension scores.
 
-## 9. Validation
+## Validation
 
 Validation is performed by `_validate_and_normalize()` in `ai_evaluator.py` using Pydantic models:
 
@@ -177,7 +183,7 @@ Validation is performed by `_validate_and_normalize()` in `ai_evaluator.py` usin
 
 If validation fails, a `ValueError` is raised, the evaluation is not saved, and the backend returns a controlled error to the frontend.
 
-## 10. Persistence
+## Persistence
 
 Evaluation results are persisted using the existing SQLAlchemy models:
 
@@ -201,7 +207,7 @@ The frontend Pydantic schema (`schemas.py`) uses `field_validator` to parse the 
 
 Existing seeded evaluations are fully compatible with the new schema because the new columns are nullable.
 
-## 11. UI
+## UI
 
 The Call Detail page evaluation section was enhanced but not redesigned:
 
@@ -212,7 +218,7 @@ The Call Detail page evaluation section was enhanced but not redesigned:
 - **Run Evaluation button**: Shows "Evaluating..." with a spinner while the request is in flight. Button is disabled during evaluation to prevent duplicate submissions.
 - **Error handling**: If evaluation fails, a friendly error message is displayed inside the evaluation card. Raw backend errors are not shown.
 
-## 12. Testing
+## Testing
 
 Tests were performed after implementation:
 
@@ -234,7 +240,7 @@ Tests were performed after implementation:
 - **Build**: Passed — `npm run build` succeeds.
 - **Lint**: Passed — only pre-existing warnings (no new issues introduced).
 
-## 13. Known Limitations
+## Known Limitations
 
 - **Mock fallback**: When `OPENAI_API_KEY` is not configured, the system returns deterministic mock data. This is intentional for the MVP but means the AI workflow is not live in the default environment.
 - **Transcript truncation**: Transcripts are truncated to 12,000 characters before being sent to the AI. Very long calls may lose context.
@@ -243,7 +249,7 @@ Tests were performed after implementation:
 - **Single AI provider**: Only OpenAI-compatible APIs are supported via `OPENAI_BASE_URL`. No multi-provider fallback.
 - **No authentication**: Anyone with access to the API can evaluate calls.
 
-## 14. Sprint 3 Definition of Done
+## Sprint 3 Definition of Done
 
 Sprint 3 is complete. A reviewer can perform the full workflow:
 
@@ -269,7 +275,7 @@ And:
 - Frontend builds successfully ✓
 - Backend APIs work ✓
 
-## 15. Sprint 4 Focus
+## Sprint 4 Focus
 
 Sprint 4 should focus on:
 

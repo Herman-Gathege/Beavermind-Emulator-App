@@ -2,11 +2,11 @@
 
 ## Sprint Objective
 
-Improve the visual quality, readability, and consistency of existing charts and graphs across the Dashboard and Analytics pages, and complete the final system integration including Coach and Client management, navigation updates, and end-to-end validation.
+I improved the visual quality, readability, and consistency of existing charts and graphs across the Dashboard and Analytics pages, and completed the final system integration including Coach and Client management, navigation updates, and end-to-end validation.
 
 ## Navigation
 
-The application now includes the following navigation items in the sidebar:
+I updated the sidebar navigation to include:
 
 - Dashboard (`/`)
 - Coaches (`/coaches`)
@@ -60,7 +60,7 @@ Active route highlighting is functional. Sidebar collapse/expand works on deskto
 
 ## Coach Management
 
-Backend CRUD endpoints implemented:
+I implemented backend CRUD endpoints:
 
 - `GET /api/coaches` — list/search coaches
 - `GET /api/coaches/{id}` — get single coach
@@ -68,7 +68,7 @@ Backend CRUD endpoints implemented:
 - `PUT /api/coaches/{id}` — update coach
 - `DELETE /api/coaches/{id}` — delete coach (with dependency protection)
 
-Frontend page at `/coaches` supports:
+I built the frontend page at `/coaches` with:
 
 - List view with search
 - Create coach via dialog form
@@ -79,7 +79,7 @@ Frontend page at `/coaches` supports:
 
 ## Client Management
 
-Backend CRUD endpoints implemented:
+I implemented backend CRUD endpoints:
 
 - `GET /api/clients` — list/search clients
 - `GET /api/clients/{id}` — get single client
@@ -87,7 +87,7 @@ Backend CRUD endpoints implemented:
 - `PUT /api/clients/{id}` — update client
 - `DELETE /api/clients/{id}` — delete client (with dependency protection)
 
-Frontend page at `/clients` supports:
+I built the frontend page at `/clients` with:
 
 - List view with search
 - Create client via dialog form
@@ -99,34 +99,40 @@ Frontend page at `/clients` supports:
 ## UX/UI Improvements
 
 ### Chart Card Consistency
+
 - All chart cards now include `CardTitle` (with icon) + `CardDescription` for clear hierarchy
 - Consistent card padding and spacing
 - Uniform chart heights using shared `CHART_HEIGHTS` constants
 - Consistent `border-dashed` empty states with matching heights
 
 ### Typography
+
 - Chart titles reduced to `text-base` for cleaner hierarchy
 - Muted descriptions in `text-sm text-muted-foreground`
 - Axis labels use muted foreground color (`#737373`) for subtlety
 - Consistent `tracking-tight` on page headings
 
 ### Tooltips
-- Shared `CHART_DEFAULT_TOOLTIP_STYLE` across all charts:
-  - White/light background with subtle border
-  - Rounded corners (8px)
-  - Subtle shadow for depth
-  - Consistent padding and font size
+
+I created a shared tooltip style across all charts:
+
+- White/light background with subtle border
+- Rounded corners (8px)
+- Subtle shadow for depth
+- Consistent padding and font size
 - Bar chart tooltips show descriptive labels ("X calls", "X evaluations")
 - Coach performance tooltip shows both series values + average score
 - Pie chart tooltip shows count and percentage
 
 ### Empty States
+
 - Professional empty states with dashed borders
 - Matching icon + descriptive message
 - Same height as chart containers for consistent layout
 - No broken axes or empty grid lines
 
 ### Loading States
+
 - Existing skeleton loading patterns preserved
 - Pulse animation blocks match application styling
 
@@ -143,7 +149,7 @@ Frontend page at `/clients` supports:
 
 ## Reusable Chart Styling
 
-Created `frontend/src/lib/chart-utils.ts` containing:
+I created `frontend/src/lib/chart-utils.ts` containing:
 
 - `CHART_COLORS` — shared color palette (primary, secondary, tertiary)
 - `CHART_DEFAULT_TOOLTIP_STYLE` — consistent tooltip CSS
@@ -184,7 +190,7 @@ Live data continues to flow: Backend → API → React → Recharts
 
 ## Core Workflow Validation
 
-The complete user journey was verified:
+I verified the complete user journey:
 
 1. **Dashboard** loads with live stats (total calls, evaluated, pending, avg score, coaches)
 2. **Calls** page lists all calls with search and type filters
@@ -211,7 +217,7 @@ The complete user journey was verified:
 
 ## API Audit
 
-Tested endpoints:
+I tested all endpoints:
 
 | Method | Path | Status |
 |--------|------|--------|
@@ -255,7 +261,7 @@ Tested endpoints:
 
 ## Settings Page
 
-The Settings page remains a placeholder. It now clearly states: "Settings and user preferences are outside the scope of this MVP." No misleading fake controls are present.
+I kept the Settings page as a placeholder. It now clearly states: "Settings and user preferences are outside the scope of this MVP." No misleading fake controls are present.
 
 ## Build & Lint
 
@@ -267,7 +273,7 @@ npm run build
 # built successfully — no TypeScript errors
 
 npm run lint
-# Pre-existing warnings only (calls.tsx, call-detail.tsx, badge.tsx, button.tsx)
+# Pre-existing warnings only
 # No new warnings introduced by Sprint 4 changes
 ```
 
@@ -277,7 +283,7 @@ Backend health check returns `{"status":"ok"}`.
 
 ## Responsive Validation
 
-Tested viewports:
+I tested these viewports:
 
 - 320px — mobile layout functional
 - 375px — mobile layout functional
@@ -326,7 +332,7 @@ No horizontal overflow detected. Charts remain usable. Sidebar collapses correct
 
 **READY**
 
-The application is a credible, demonstrable MVP with:
+I built a credible, demonstrable MVP with:
 
 - Functional Coach and Client management (CRUD)
 - Live Dashboard with real statistics and charts
@@ -337,7 +343,7 @@ The application is a credible, demonstrable MVP with:
 - Professional SaaS appearance
 - Consistent design system
 
-The product story is complete:
+The product story is complete from my perspective:
 
 **MANAGE COACHES & CLIENTS**
 **↓**
@@ -351,8 +357,6 @@ The product story is complete:
 **↓**
 **UNDERSTAND COACH PERFORMANCE**
 
----
-
 ## Deployment Preparation
 
 ### Architecture
@@ -360,7 +364,7 @@ The product story is complete:
 ```
 Vercel Frontend
       ↓
-FastAPI Backend (Railway/Render)
+FastAPI Backend (Render)
       ↓
 Supabase PostgreSQL
       ↓
@@ -378,7 +382,7 @@ OpenAI API (server-side only)
 
 **SPA Routing:** `vercel.json` configured to rewrite all routes to `index.html`.
 
-### Backend Deployment — Railway/Render
+### Backend Deployment — Render
 
 | Setting | Value |
 |---------|-------|
@@ -403,20 +407,19 @@ Tables are auto-created on startup via `Base.metadata.create_all(bind=engine)`.
 | `OPENAI_API_KEY` | Yes | OpenAI API key (server-side only) |
 | `OPENAI_BASE_URL` | No | OpenAI API base URL (default: `https://api.openai.com/v1`) |
 | `OPENAI_MODEL` | No | Model to use (default: `gpt-4o-mini`) |
-| `CORS_ORIGINS` | Yes | Comma-separated allowed origins (e.g., `https://your-app.vercel.app`) |
+| `CORS_ORIGINS` | Yes | Comma-separated allowed origins |
 
 #### Frontend
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `VITE_API_BASE_URL` | Yes | Full backend API URL (e.g., `https://your-backend.up.railway.app/api`) |
+| `VITE_API_BASE_URL` | Yes | Full backend API URL |
 
 ### CORS Configuration
 
 **Development:** `CORS_ORIGINS=*` allows all origins.
 
 **Production:** Set `CORS_ORIGINS` to the deployed Vercel frontend URL.
-Multiple origins can be comma-separated: `https://app.vercel.app,https://app-staging.vercel.app`
 
 ### AI Configuration
 
@@ -449,7 +452,7 @@ cd frontend
 npm install
 npm run build
 
-# Backend (Railway/Render)
+# Backend (Render)
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port $PORT
@@ -458,7 +461,7 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 ### Deployment Checklist
 
 1. Provision Supabase project and database
-2. Deploy backend to Railway/Render with environment variables
+2. Deploy backend to Render with environment variables
 3. Deploy frontend to Vercel with `VITE_API_BASE_URL` set
 4. Set `CORS_ORIGINS` on backend to Vercel frontend URL
 5. Run seed script if database needs initial data
