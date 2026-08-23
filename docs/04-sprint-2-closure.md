@@ -2,35 +2,38 @@
 
 ## Sprint Objective
 
-Connect the existing frontend to real backend and database data. This involved completing the backend API, fixing data-layer bugs, wiring frontend pages to live endpoints, adding charts, and validating the end-to-end data flow: Supabase → Python backend → API response → React frontend → rendered UI.
+I connected the existing frontend to real backend and database data. This meant completing the backend API, fixing data-layer bugs, wiring frontend pages to live endpoints, adding charts, and validating the end-to-end data flow: Supabase → Python backend → API response → React frontend → rendered UI.
 
-## Completed Work
+## What I Accomplished
 
 ### Backend Fixes
+
+I ran into several issues when I tried to wire the frontend to the backend:
 
 - Fixed relative imports in routers that failed when running `uvicorn main:app` directly.
 - Changed list endpoint response models from single schema to `List[Schema]` to serialize arrays correctly.
 - Added `search` query parameter to `GET /api/calls`.
 - Added `total_coaches` to `DashboardStats` response.
 - Added `GET /api/evaluations` list endpoint.
-- Fixed `seed.py` imports (changed `models` to `sql_models`) and ensured tables are created before seeding.
+- Fixed `seed.py` imports and ensured tables are created before seeding.
 - Imported `SQLEnum` in `sql_models.py`.
-- Updated `DATABASE_URL` scheme from `postgresql://` to `postgresql+psycopg://` to match installed `psycopg[binary]` (psycopg3) driver.
+- Updated `DATABASE_URL` scheme to match the installed psycopg3 driver.
 
 ### Database Setup
 
 - Supabase PostgreSQL runs locally via Docker Compose on port `54322`.
 - SQLAlchemy 2.0 with `Base.metadata.create_all(bind=engine)` handles schema creation.
-- No migrations directory; schema is managed through ORM models.
+- No migrations directory yet; schema is managed through ORM models.
 
 ### Seed Data
 
-- `backend/seed.py` creates demo data:
-  - 5 coaches
-  - 10 clients
-  - 10 programs
-  - 10 calls (one per program, across all 4 call types)
-  - 5 historical evaluations with 12 dimension scores each
+`backend/seed.py` creates demo data:
+
+- 5 coaches
+- 10 clients
+- 10 programs
+- 10 calls (one per program, across all 4 call types)
+- 5 historical evaluations with 12 dimension scores each
 
 ### API Endpoints
 
@@ -80,7 +83,7 @@ Connect the existing frontend to real backend and database data. This involved c
 - Transcript displayed in read-only textarea.
 - Evaluation results with overall score, progress bar, summary, and dimension scores.
 - "Run Evaluation" button triggers live API call.
-- Loading skeletons and error handling ("Call not found", connection error).
+- Loading skeletons and error handling.
 
 ### Analytics
 
@@ -167,7 +170,7 @@ npm run build
 
 ### End-to-End Data Flow
 
-Verified:
+I verified:
 
 1. Supabase is running and healthy.
 2. Backend connects to Supabase and seeds data successfully.
@@ -175,8 +178,6 @@ Verified:
 4. Frontend dev server proxies `/api` to `http://localhost:8000`.
 5. Frontend build completes without TypeScript errors.
 6. Dashboard, Calls, Call Detail, and Analytics pages fetch and display real data.
-
-## End-to-End Data Flow
 
 ```
 Supabase PostgreSQL
@@ -198,7 +199,7 @@ Data originates in Supabase PostgreSQL, is accessed by the FastAPI backend via S
 
 ## Deferred Work
 
-The following items were deliberately deferred to maintain the MVP time constraint:
+I deliberately deferred these items to maintain the MVP time constraint:
 
 - **Authentication**: No user login or authorization. All data remains public within the app context.
 - **Automated tests**: No backend or frontend test suites have been written.
@@ -210,7 +211,7 @@ These items are not abandoned; they are explicitly deprioritized for this sprint
 
 ## Sprint Outcome
 
-Core Sprint 2 objectives completed.
+Core Sprint 2 objectives completed. The frontend now talks to real backend data instead of mock placeholders.
 
 ## Sprint 3 Objective
 

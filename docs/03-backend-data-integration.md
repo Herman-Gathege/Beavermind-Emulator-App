@@ -2,61 +2,68 @@
 
 ## Objective
 
-Connect the existing frontend to real application data by completing the backend API, fixing data-layer bugs, wiring frontend pages to live endpoints, adding charts, and validating the end-to-end flow: Supabase → Python backend → API response → React frontend → rendered UI.
+I connected the existing frontend to real application data. This meant completing the backend API, fixing data-layer bugs, wiring frontend pages to live endpoints, adding charts, and validating the end-to-end flow: Supabase → Python backend → API response → React frontend → rendered UI.
 
-## Existing Backend Findings
+## What I Found in the Backend
 
-The backend already had a FastAPI scaffold with SQLAlchemy models, Pydantic schemas, routers, a seed script, and an AI evaluation service. Key findings:
+I found that the backend already had a FastAPI scaffold with SQLAlchemy models, Pydantic schemas, routers, a seed script, and an AI evaluation service. But it had several issues that prevented it from working end-to-end:
 
-- **Framework**: FastAPI with uvicorn.
-- **Entry point**: `backend/main.py`.
-- **Database**: SQLAlchemy 2.0 with psycopg/psycopg2-style URLs. Local PostgreSQL provided by Supabase Docker image (`supabase/postgres:15.1.0.147`) on port `54322`.
+- **Framework**: FastAPI with uvicorn. Entry point is `backend/main.py`.
+- **Database**: SQLAlchemy 2.0 with psycopg3 URLs. Local PostgreSQL provided by Supabase Docker image on port `54322`.
 - **Models**: `Coach`, `Client`, `Program`, `Call`, `Evaluation`, `DimensionScore` defined in `sql_models.py`.
 - **Schemas**: Pydantic schemas in `schemas.py`.
 - **Routers**: `coaches`, `clients`, `programs`, `calls`, `evaluations`, `dashboard`.
 - **Config**: `pydantic-settings` with `.env` support.
 - **CORS**: Configured with `allow_origins=["*"]` for local development.
 - **Seed script**: `seed.py` existed but had import issues and minimal data.
-- **Tests**: No test files present.
-- **Issues found**:
-  - Router imports used relative imports (`..database`) that fail when running `uvicorn main:app` directly.
-  - Several list endpoints returned `response_model=SingleSchema` instead of `List[SingleSchema]`.
-  - `calls` router was missing the `search` query parameter.
-  - `dashboard/stats` did not include `total_coaches`.
-  - `evaluations` router was missing a `GET /evaluations` list endpoint.
-  - `seed.py` imported from `models` instead of `sql_models`, and did not create tables before seeding.
-  - `sql_models.py` used `SQLEnum` without importing it.
-  - `DATABASE_URL` in `.env.example` used `postgresql://` which requires psycopg2, but only psycopg3 (`psycopg[binary]`) was installed.
 
-## Existing Frontend Data Flow
+The issues I ran into:
 
-Before Sprint 2, the frontend had:
+1. Router imports used relative imports (`..database`) that fail when running `uvicorn main:app` directly.
+2. Several list endpoints returned `response_model=SingleSchema` instead of `List[SingleSchema]`.
+3. `calls` router was missing the `search` query parameter.
+4. `dashboard/stats` did not include `total_coaches`.
+5. `evaluations` router was missing a `GET /evaluations` list endpoint.
+6. `seed.py` imported from `models` instead of `sql_models`, and did not create tables before seeding.
+7. `sql_models.py` used `SQLEnum` without importing it.
+8. `DATABASE_URL` in `.env.example` used `postgresql://` which requires psycopg2, but only psycopg3 (`psycopg[binary]`) was installed.
 
-- **Dashboard**: Loaded stats and evaluations from `/api/dashboard/stats` and `/api/evaluations`. Stats had a hard-coded `"Coaches"` card value of `"—"`. The chart area was a placeholder.
-- **Calls page**: Fetched `/api/calls` with search/type filters. Displayed call title, type badge, date, and status. Did not display coach, client, or program names.
-- **Call detail**: Fetched `/api/calls/{id}`. Displayed transcript and evaluation results. Did not display coach/client/program metadata cards. Error handling was minimal (`console.error` only).
-- **Analytics**: Pure placeholder — no data fetching.
-- **Settings**: Pure placeholder.
-- **Loading states**: Dashboard had no loading state (just `Loading...` text). Calls page had skeletons. Call detail had skeletons.
-- **Error handling**: Minimal. Most pages just logged errors to console.
+## What I Fixed
 
-## Database Design
+### Backend Fixes
 
-The existing models were reused without changes. The actual entities used:
+- Fixed relative imports in routers to absolute imports so `uvicorn main:app` works correctly.
+- Changed list endpoint response models from `Schema` to `List[Schema]` so FastAPI serializes arrays correctly.
+- Added `search` param to `GET /api/calls` so the frontend search input actually works.
+- Added `total_coaches` to `DashboardStats` so the dashboard coaches card shows real data instead of `"—"`.
+- Added `GET /api/evaluations` list endpoint so the dashboard can populate "Recent Evaluations".
+- Fixed `seed.py` imports (changed `models` to `sql_models`) and ensured tables are created before seeding.
+- Imported `SQLEnum` in `sql_models.py`.
+- Updated `DATABASE_URL` scheme from `postgresql://` to `postgresql+psycopg://` to match the installed psycopg3 driver.
 
-| Entity | Table | Key Fields |
-|--------|-------|------------|
-| Coach | `coaches` | id, name, specialty, bio, created_at |
-| Client | `clients` | id, name, organization, created_at |
-| Program | `programs` | id, name, coach_id (FK), client_id (FK), created_at |
-| Call | `calls` | id, coach_id (FK), client_id (FK), program_id (FK), type (enum), title, scheduled_at, transcript, status (enum), created_at |
-| Evaluation | `evaluations` | id, call_id (FK), overall_score, summary, raw_response, created_at |
-| DimensionScore | `dimension_scores` | id, evaluation_id (FK), dimension, score, feedback, evidence, created_at |
+### Database Setup
 
-Call types: `sales`, `kickoff`, `coaching`, `strategic_review`.
-Call statuses: `pending`, `evaluated`, `failed`.
+- Supabase PostgreSQL runs locally via Docker Compose on port `54322`.
+- SQLAlchemy 2.0 with `Base.metadata.create_all(bind=engine)` handles schema creation.
+- No migrations directory yet; schema is managed through ORM models.
 
-No migrations directory exists; schema creation is handled by `Base.metadata.create_all(bind=engine)`.
+### Seed Data
+
+I updated `backend/seed.py` to create demo data:
+
+- **5 coaches**: Alice M., James K., Priya N., David R., Sofia L.
+- **10 clients**: TechCorp Inc., GreenField Ltd., FinEdge, MediCare Plus, EduFirst, BuildRight, CloudNine, UrbanEats, AutoDrive, SpaceLink.
+- **10 programs**: One per client, assigned to coaches in round-robin.
+- **10 calls**: One per program, distributed across all 4 call types. Each call has a realistic transcript.
+- **5 evaluations**: Historical evaluations seeded for the first 5 calls, each with 12 dimension scores. These allow the dashboard and analytics pages to display meaningful statistics before Sprint 3's live AI evaluation.
+
+To seed:
+
+```bash
+cd backend
+source .venv/bin/activate
+python3 -c "from seed import seed_data; from database import SessionLocal; seed_data(SessionLocal())"
+```
 
 ## API Endpoints
 
@@ -77,31 +84,13 @@ No migrations directory exists; schema creation is handled by `Base.metadata.cre
 | GET | `/api/dashboard/stats` | Dashboard statistics (total calls, evaluated, pending, avg score, total coaches) |
 | GET | `/health` | Health check |
 
-## Seed Data
-
-Demo data is created by `backend/seed.py`:
-
-- **5 coaches**: Alice M., James K., Priya N., David R., Sofia L.
-- **10 clients**: TechCorp Inc., GreenField Ltd., FinEdge, MediCare Plus, EduFirst, BuildRight, CloudNine, UrbanEats, AutoDrive, SpaceLink.
-- **10 programs**: One per client, assigned to coaches in round-robin.
-- **10 calls**: One per program, distributed across all 4 call types. Each call has a realistic transcript.
-- **5 evaluations**: Historical evaluations seeded for the first 5 calls, each with 12 dimension scores. These allow the dashboard and analytics pages to display meaningful statistics before Sprint 3's live AI evaluation.
-
-To seed:
-
-```bash
-cd backend
-source .venv/bin/activate
-python3 -c "from seed import seed_data; from database import SessionLocal; seed_data(SessionLocal())"
-```
-
 ## Frontend Integration
 
 ### Dashboard (`frontend/src/components/dashboard.tsx`)
 
 - Receives `stats`, `recentEvaluations`, and `calls` from `App.tsx`.
 - Displays 4 stat cards: Total Calls, Evaluated, Avg Score, Coaches.
-- **Call Distribution by Type** bar chart using Recharts (`recharts`).
+- **Call Distribution by Type** bar chart using Recharts.
 - **Recent Evaluations** list showing call ID (truncated) and score.
 - **Evaluation Score Distribution** bar chart bucketed into score ranges.
 - Loading state: skeleton pulses rendered in `App.tsx`.
@@ -134,10 +123,6 @@ python3 -c "from seed import seed_data; from database import SessionLocal; seed_
 - **Evaluation Score Distribution** bar chart.
 - **Coach Performance** grouped bar chart (calls vs evaluated, with avg score tooltip data).
 - Loading and error states implemented.
-
-### Settings Page
-
-Remains a placeholder. Not in Sprint 2 scope.
 
 ## Error Handling
 
@@ -212,14 +197,14 @@ curl -s http://localhost:8000/api/evaluations/call/6b7efbdf-3319-4bc4-b731-cb8eb
 ```bash
 cd frontend
 npm run build
-# ✓ built in 2.85s
+# built successfully
 ```
 
 ### End-to-End Data Flow
 
-Verified:
+I verified:
 
-1. Supabase is running and healthy (`docker compose ps` shows `healthy`).
+1. Supabase is running and healthy.
 2. Backend connects to Supabase and seeds data successfully.
 3. Backend API returns correct JSON for all endpoints.
 4. Frontend dev server proxies `/api` to `http://localhost:8000`.
