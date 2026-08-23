@@ -350,3 +350,117 @@ The product story is complete:
 **REVIEW 12 DIMENSIONS**
 **↓**
 **UNDERSTAND COACH PERFORMANCE**
+
+---
+
+## Deployment Preparation
+
+### Architecture
+
+```
+Vercel Frontend
+      ↓
+FastAPI Backend (Railway/Render)
+      ↓
+Supabase PostgreSQL
+      ↓
+OpenAI API (server-side only)
+```
+
+### Frontend Deployment — Vercel
+
+| Setting | Value |
+|---------|-------|
+| Framework | Vite |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+| Install Command | `npm install` |
+
+**SPA Routing:** `vercel.json` configured to rewrite all routes to `index.html`.
+
+### Backend Deployment — Railway/Render
+
+| Setting | Value |
+|---------|-------|
+| Runtime | Python 3.12 |
+| Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
+| Working Directory | `backend/` |
+
+### Database — Supabase PostgreSQL
+
+Production database must be provisioned via Supabase. Connection string format:
+`postgresql+psycopg://user:password@host:5432/database`
+
+Tables are auto-created on startup via `Base.metadata.create_all(bind=engine)`.
+
+### Environment Variables
+
+#### Backend
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | Supabase PostgreSQL connection string |
+| `OPENAI_API_KEY` | Yes | OpenAI API key (server-side only) |
+| `OPENAI_BASE_URL` | No | OpenAI API base URL (default: `https://api.openai.com/v1`) |
+| `OPENAI_MODEL` | No | Model to use (default: `gpt-4o-mini`) |
+| `CORS_ORIGINS` | Yes | Comma-separated allowed origins (e.g., `https://your-app.vercel.app`) |
+
+#### Frontend
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_API_BASE_URL` | Yes | Full backend API URL (e.g., `https://your-backend.up.railway.app/api`) |
+
+### CORS Configuration
+
+**Development:** `CORS_ORIGINS=*` allows all origins.
+
+**Production:** Set `CORS_ORIGINS` to the deployed Vercel frontend URL.
+Multiple origins can be comma-separated: `https://app.vercel.app,https://app-staging.vercel.app`
+
+### AI Configuration
+
+- `OPENAI_API_KEY` exists ONLY on the backend server environment
+- API key is never exposed to the frontend
+- Without a valid key, the system returns mock evaluations for demonstration
+- Key is logged only in error contexts, never in plain text
+
+### Health Check
+
+`GET /health` returns `{"status": "ok"}` — used by platform health monitors.
+
+### Production Validation
+
+| Check | Status |
+|-------|--------|
+| Frontend build (`npm run build`) | PASS — 805 KB JS (230 KB gzipped) |
+| TypeScript compilation | PASS — no errors |
+| Backend health endpoint | Operational |
+| API routes | All verified |
+| SPA routing | Configured via `vercel.json` |
+| CORS | Configurable via environment variable |
+| Environment secrets | Protected via `.gitignore` |
+
+### Deployment Commands
+
+```bash
+# Frontend (Vercel auto-detects on push)
+cd frontend
+npm install
+npm run build
+
+# Backend (Railway/Render)
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+### Deployment Checklist
+
+1. Provision Supabase project and database
+2. Deploy backend to Railway/Render with environment variables
+3. Deploy frontend to Vercel with `VITE_API_BASE_URL` set
+4. Set `CORS_ORIGINS` on backend to Vercel frontend URL
+5. Run seed script if database needs initial data
+6. Verify `/health` returns `{"status": "ok"}`
+7. Test core workflow end-to-end

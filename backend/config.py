@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     API_PREFIX: str = "/api"
+    CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "*")
 
     class Config:
         env_file = ".env"
