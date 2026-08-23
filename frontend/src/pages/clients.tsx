@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { apiFetch } from "@/lib/api";
 
 interface Client {
   id: string;
@@ -48,7 +49,7 @@ export function ClientsPage() {
     try {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
-      const res = await fetch(`/api/clients?${params}`);
+      const res = await apiFetch(`/clients?${params}`);
       if (!res.ok) throw new Error(`Failed to load clients (${res.status})`);
       const data = await res.json();
       setClients(data);
@@ -88,20 +89,24 @@ export function ClientsPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch("/api/clients", {
+      const res = await apiFetch("/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || `Failed to create client (${res.status})`);
+        throw new Error(
+          body.detail || `Failed to create client (${res.status})`,
+        );
       }
       setCreateOpen(false);
       setForm(emptyForm);
       fetchClients();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to create client");
+      setFormError(
+        err instanceof Error ? err.message : "Failed to create client",
+      );
     } finally {
       setSaving(false);
     }
@@ -114,20 +119,24 @@ export function ClientsPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch(`/api/clients/${selected.id}`, {
+      const res = await apiFetch(`/clients/${selected.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || `Failed to update client (${res.status})`);
+        throw new Error(
+          body.detail || `Failed to update client (${res.status})`,
+        );
       }
       setEditOpen(false);
       setSelected(null);
       fetchClients();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to update client");
+      setFormError(
+        err instanceof Error ? err.message : "Failed to update client",
+      );
     } finally {
       setSaving(false);
     }
@@ -137,16 +146,22 @@ export function ClientsPage() {
     if (!selected) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/clients/${selected.id}`, { method: "DELETE" });
+      const res = await apiFetch(`/clients/${selected.id}`, {
+        method: "DELETE",
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || `Failed to delete client (${res.status})`);
+        throw new Error(
+          body.detail || `Failed to delete client (${res.status})`,
+        );
       }
       setDeleteOpen(false);
       setSelected(null);
       fetchClients();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Failed to delete client");
+      setFormError(
+        err instanceof Error ? err.message : "Failed to delete client",
+      );
       setDeleteOpen(false);
     } finally {
       setSaving(false);
@@ -157,7 +172,9 @@ export function ClientsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Clients</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+            Clients
+          </h2>
           <p className="text-muted-foreground mt-1">
             Manage client organizations
           </p>
@@ -187,7 +204,9 @@ export function ClientsPage() {
           {error ? (
             <div className="py-8 text-center">
               <p className="text-sm text-destructive mb-2">{error}</p>
-              <Button variant="outline" size="sm" onClick={fetchClients}>Retry</Button>
+              <Button variant="outline" size="sm" onClick={fetchClients}>
+                Retry
+              </Button>
             </div>
           ) : loading ? (
             <div className="space-y-3">
@@ -208,17 +227,29 @@ export function ClientsPage() {
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium truncate">{client.name}</span>
+                      <span className="font-medium truncate">
+                        {client.name}
+                      </span>
                       {client.organization && (
                         <Badge variant="outline">{client.organization}</Badge>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(client)} aria-label={`Edit ${client.name}`}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEdit(client)}
+                      aria-label={`Edit ${client.name}`}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => openDelete(client)} aria-label={`Delete ${client.name}`}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openDelete(client)}
+                      aria-label={`Delete ${client.name}`}
+                    >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </div>
@@ -237,39 +268,77 @@ export function ClientsPage() {
         <div className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="create-name">Name</Label>
-            <Input id="create-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input
+              id="create-name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="create-org">Organization</Label>
-            <Input id="create-org" value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} />
+            <Input
+              id="create-org"
+              value={form.organization}
+              onChange={(e) =>
+                setForm({ ...form, organization: e.target.value })
+              }
+            />
           </div>
           {formError && <p className="text-sm text-destructive">{formError}</p>}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={saving}>Cancel</Button>
-          <Button onClick={handleCreate} disabled={saving}>{saving ? "Saving..." : "Create Client"}</Button>
+          <Button
+            variant="outline"
+            onClick={() => setCreateOpen(false)}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} disabled={saving}>
+            {saving ? "Saving..." : "Create Client"}
+          </Button>
         </DialogFooter>
       </Dialog>
 
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogHeader>
           <DialogTitle>Edit Client</DialogTitle>
-          <DialogDescription>Update the client details below.</DialogDescription>
+          <DialogDescription>
+            Update the client details below.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 mt-4">
           <div className="space-y-2">
             <Label htmlFor="edit-name">Name</Label>
-            <Input id="edit-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input
+              id="edit-name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="edit-org">Organization</Label>
-            <Input id="edit-org" value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} />
+            <Input
+              id="edit-org"
+              value={form.organization}
+              onChange={(e) =>
+                setForm({ ...form, organization: e.target.value })
+              }
+            />
           </div>
           {formError && <p className="text-sm text-destructive">{formError}</p>}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setEditOpen(false)} disabled={saving}>Cancel</Button>
-          <Button onClick={handleUpdate} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</Button>
+          <Button
+            variant="outline"
+            onClick={() => setEditOpen(false)}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleUpdate} disabled={saving}>
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
         </DialogFooter>
       </Dialog>
 
@@ -277,12 +346,25 @@ export function ClientsPage() {
         <DialogHeader>
           <DialogTitle>Delete Client</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete <strong>{selected?.name}</strong>? This action cannot be undone.
+            Are you sure you want to delete <strong>{selected?.name}</strong>?
+            This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={saving}>Cancel</Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={saving}>{saving ? "Deleting..." : "Delete"}</Button>
+          <Button
+            variant="outline"
+            onClick={() => setDeleteOpen(false)}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={saving}
+          >
+            {saving ? "Deleting..." : "Delete"}
+          </Button>
         </DialogFooter>
       </Dialog>
     </div>

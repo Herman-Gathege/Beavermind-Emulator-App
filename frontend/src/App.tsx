@@ -11,8 +11,9 @@ import { ClientsPage } from "@/pages/clients";
 import { Toaster } from "@/components/ui/toaster";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+// const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -84,15 +85,15 @@ function DashboardPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE}/dashboard/stats`).then((r) => {
+      apiFetch("/dashboard/stats").then((r) => {
         if (!r.ok) throw new Error(`Stats failed: ${r.status}`);
         return r.json();
       }),
-      fetch(`${API_BASE}/evaluations`).then((r) => {
+      apiFetch("/evaluations").then((r) => {
         if (!r.ok) throw new Error(`Evaluations failed: ${r.status}`);
         return r.json();
       }),
-      fetch(`${API_BASE}/calls`).then((r) => {
+      apiFetch("/calls").then((r) => {
         if (!r.ok) throw new Error(`Calls failed: ${r.status}`);
         return r.json();
       }),
