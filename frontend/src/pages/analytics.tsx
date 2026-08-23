@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart3, TrendingUp } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 import {
   BarChart,
   Bar,
@@ -55,11 +56,11 @@ export function AnalyticsPage() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/calls").then((r) => {
+      apiFetch("/calls").then((r) => {
         if (!r.ok) throw new Error(`Calls failed: ${r.status}`);
         return r.json();
       }),
-      fetch("/api/evaluations").then((r) => {
+      apiFetch("/evaluations").then((r) => {
         if (!r.ok) throw new Error(`Evaluations failed: ${r.status}`);
         return r.json();
       }),

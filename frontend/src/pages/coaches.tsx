@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { apiFetch } from "@/lib/api";
 
 interface Coach {
   id: string;
@@ -50,7 +51,7 @@ export function CoachesPage() {
     try {
       const params = new URLSearchParams();
       if (search) params.append("search", search);
-      const res = await fetch(`/api/coaches?${params}`);
+      const res = await apiFetch(`/coaches?${params}`);
       if (!res.ok) throw new Error(`Failed to load coaches (${res.status})`);
       const data = await res.json();
       setCoaches(data);
@@ -90,7 +91,7 @@ export function CoachesPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch("/api/coaches", {
+      const res = await apiFetch("/coaches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -116,7 +117,7 @@ export function CoachesPage() {
     }
     setSaving(true);
     try {
-      const res = await fetch(`/api/coaches/${selected.id}`, {
+      const res = await apiFetch(`/coaches/${selected.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -139,7 +140,7 @@ export function CoachesPage() {
     if (!selected) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/coaches/${selected.id}`, { method: "DELETE" });
+      const res = await apiFetch(`/coaches/${selected.id}`, { method: "DELETE" });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail || `Failed to delete coach (${res.status})`);

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiFetch } from "@/lib/api";
 
 interface Coach {
   id: string;
@@ -74,7 +75,7 @@ export function CallDetail() {
 
   const fetchCall = async () => {
     try {
-      const res = await fetch(`/api/calls/${id}`);
+      const res = await apiFetch(`/calls/${id}`);
       if (!res.ok) {
         if (res.status === 404) {
           setError("Call not found");
@@ -96,7 +97,7 @@ export function CallDetail() {
     setEvaluating(true);
     setEvalError(null);
     try {
-      const res = await fetch(`/api/evaluations?call_id=${id}`, {
+      const res = await apiFetch(`/evaluations?call_id=${id}`, {
         method: "POST",
       });
       if (!res.ok) {

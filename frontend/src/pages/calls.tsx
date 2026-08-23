@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { apiFetch } from "@/lib/api";
 
 interface Coach {
   id: string;
@@ -62,7 +63,7 @@ export function CallList() {
       if (search) params.append("search", search);
       if (typeFilter !== "all") params.append("type", typeFilter);
 
-      const res = await fetch(`/api/calls?${params}`);
+      const res = await apiFetch(`/calls?${params}`);
       if (!res.ok) throw new Error(`Failed to load calls (${res.status})`);
       const data = await res.json();
       setCalls(data);
