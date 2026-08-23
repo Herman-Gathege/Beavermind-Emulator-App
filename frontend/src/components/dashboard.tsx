@@ -5,7 +5,7 @@ import {
   CheckCircle2,
   TrendingUp,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   BarChart,
   Bar,
@@ -15,6 +15,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import {
+  CHART_COLORS,
+  CHART_DEFAULT_TOOLTIP_STYLE,
+  CHART_AXIS_STYLE,
+  CHART_GRID_STYLE,
+  SCORE_LABELS,
+  CHART_HEIGHTS,
+} from "@/lib/chart-utils";
 
 interface DashboardStats {
   total_calls: number;
@@ -58,10 +66,10 @@ export function Dashboard({ stats, recentEvaluations, calls }: DashboardProps) {
   }));
 
   const scoreRanges = [
-    { name: "4.5 - 5.0", range: "excellent", min: 4.5, max: 5.0 },
-    { name: "4.0 - 4.4", range: "good", min: 4.0, max: 4.4 },
-    { name: "3.0 - 3.9", range: "average", min: 3.0, max: 3.9 },
-    { name: "< 3.0", range: "low", min: 0, max: 3.0 },
+    { name: SCORE_LABELS.excellent, key: "excellent", min: 4.5, max: 5.0 },
+    { name: SCORE_LABELS.good, key: "good", min: 4.0, max: 4.5 },
+    { name: SCORE_LABELS.average, key: "average", min: 3.0, max: 4.0 },
+    { name: SCORE_LABELS.low, key: "low", min: 0, max: 3.0 },
   ];
 
   const scoreChartData = scoreRanges.map((range) => {
@@ -86,31 +94,48 @@ export function Dashboard({ stats, recentEvaluations, calls }: DashboardProps) {
       <div className="grid gap-4 md:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-7">
         <Card className="col-span-1 md:col-span-4">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <BarChart3 className="h-4 w-4 text-primary" />
               Call Distribution by Type
             </CardTitle>
+            <CardDescription>Breakdown of calls by category</CardDescription>
           </CardHeader>
           <CardContent>
             {callTypeChartData.length === 0 ? (
-              <div className="h-[250px] md:h-[300px] flex flex-col items-center justify-center text-muted-foreground gap-3 rounded-lg border border-dashed">
+              <div
+                className="flex flex-col items-center justify-center text-muted-foreground gap-3 rounded-lg border border-dashed"
+                style={{ height: CHART_HEIGHTS.md }}
+              >
                 <BarChart3 className="h-8 w-8 text-primary/60" />
                 <p className="text-sm">No call data available.</p>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={callTypeChartData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="name" className="text-xs" tick={{ fontSize: 12 }} />
-                  <YAxis className="text-xs" tick={{ fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
+              <ResponsiveContainer width="100%" height={CHART_HEIGHTS.md}>
+                <BarChart data={callTypeChartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                  <CartesianGrid {...CHART_GRID_STYLE} vertical={false} />
+                  <XAxis
+                    dataKey="name"
+                    tick={CHART_AXIS_STYLE}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                  <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  <YAxis
+                    tick={CHART_AXIS_STYLE}
+                    axisLine={false}
+                    tickLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "var(--color-muted, #f5f5f5)", radius: 4 }}
+                    contentStyle={CHART_DEFAULT_TOOLTIP_STYLE}
+                    formatter={(value: number) => [`${value} call${value === 1 ? "" : "s"}`, "Count"]}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill={CHART_COLORS.tertiary}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={48}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -119,14 +144,18 @@ export function Dashboard({ stats, recentEvaluations, calls }: DashboardProps) {
 
         <Card className="col-span-1 md:col-span-3">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <CheckCircle2 className="h-4 w-4 text-primary" />
               Recent Evaluations
             </CardTitle>
+            <CardDescription>Latest coaching assessments</CardDescription>
           </CardHeader>
           <CardContent>
             {recentEvaluations.length === 0 ? (
-              <div className="h-[250px] md:h-[300px] flex flex-col items-center justify-center text-muted-foreground gap-3 rounded-lg border border-dashed">
+              <div
+                className="flex flex-col items-center justify-center text-muted-foreground gap-3 rounded-lg border border-dashed"
+                style={{ height: CHART_HEIGHTS.md }}
+              >
                 <CheckCircle2 className="h-8 w-8 text-primary/60" />
                 <p className="text-sm">No evaluations yet.</p>
               </div>
@@ -142,7 +171,7 @@ export function Dashboard({ stats, recentEvaluations, calls }: DashboardProps) {
                         Call {eval_.call_id.slice(0, 8)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Score: {eval_.overall_score?.toFixed(1)}
+                        Score: {eval_.overall_score?.toFixed(1)} / 5
                       </p>
                     </div>
                     <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 ml-3" />
@@ -156,31 +185,48 @@ export function Dashboard({ stats, recentEvaluations, calls }: DashboardProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-base">
             <TrendingUp className="h-4 w-4 text-primary" />
             Evaluation Score Distribution
           </CardTitle>
+          <CardDescription>Scores grouped by performance level</CardDescription>
         </CardHeader>
         <CardContent>
           {recentEvaluations.length === 0 ? (
-            <div className="h-[250px] md:h-[300px] flex flex-col items-center justify-center text-muted-foreground gap-3 rounded-lg border border-dashed">
+            <div
+              className="flex flex-col items-center justify-center text-muted-foreground gap-3 rounded-lg border border-dashed"
+              style={{ height: CHART_HEIGHTS.md }}
+            >
               <TrendingUp className="h-8 w-8 text-primary/60" />
               <p className="text-sm">No evaluations to display.</p>
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={scoreChartData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="name" className="text-xs" tick={{ fontSize: 12 }} />
-                <YAxis className="text-xs" tick={{ fontSize: 12 }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--background))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
+            <ResponsiveContainer width="100%" height={CHART_HEIGHTS.md}>
+              <BarChart data={scoreChartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid {...CHART_GRID_STYLE} vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={CHART_AXIS_STYLE}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <Bar dataKey="count" fill="#10b981" radius={[4, 4, 0, 0]} />
+                <YAxis
+                  tick={CHART_AXIS_STYLE}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "var(--color-muted, #f5f5f5)", radius: 4 }}
+                  contentStyle={CHART_DEFAULT_TOOLTIP_STYLE}
+                  formatter={(value: number) => [`${value} evaluation${value === 1 ? "" : "s"}`, "Count"]}
+                />
+                <Bar
+                  dataKey="count"
+                  fill={CHART_COLORS.secondary}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={48}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}

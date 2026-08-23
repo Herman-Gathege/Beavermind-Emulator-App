@@ -6,6 +6,8 @@ import { CallList } from "@/pages/calls";
 import { CallDetail } from "@/pages/call-detail";
 import { AnalyticsPage } from "@/pages/analytics";
 import { SettingsPage } from "@/pages/settings";
+import { CoachesPage } from "@/pages/coaches";
+import { ClientsPage } from "@/pages/clients";
 import { Toaster } from "@/components/ui/toaster";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,6 +50,8 @@ export default function App() {
       <AppLayout>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/coaches" element={<CoachesPage />} />
+          <Route path="/clients" element={<ClientsPage />} />
           <Route path="/calls" element={<CallList />} />
           <Route path="/calls/:id" element={<CallDetail />} />
           <Route path="/analytics" element={<AnalyticsPage />} />

@@ -3,6 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Phone,
+  Users,
+  UserRound,
   BarChart3,
   Settings,
   Menu,
@@ -12,6 +14,8 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Coaches", href: "/coaches", icon: Users },
+  { name: "Clients", href: "/clients", icon: UserRound },
   { name: "Calls", href: "/calls", icon: Phone },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Settings", href: "/settings", icon: Settings },
@@ -57,7 +61,11 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
               className="rounded-md p-1.5 hover:bg-accent hidden md:flex"
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {collapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+              {collapsed ? (
+                <Menu className="h-4 w-4" />
+              ) : (
+                <X className="h-4 w-4" />
+              )}
             </button>
             <button
               onClick={onClose}
